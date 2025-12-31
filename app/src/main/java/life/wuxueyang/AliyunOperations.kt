@@ -1,7 +1,7 @@
 package life.wuxueyang
 
 import com.aliyuncs.ecs.model.v20140526.DescribeInstancesRequest
-import com.aliyuncs.vpc.model.v20160428.DescribeEipAddressesRequest
+// import com.aliyuncs.vpc.model.v20160428.DescribeEipAddressesRequest  // Commented out since VPC SDK is not included
 
 class AliyunOperations(private val aliyunService: AliyunService) {
     
