@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "AliyunResourceManager"
+rootProject.name = "CloudResourceManager"
 include ':app'

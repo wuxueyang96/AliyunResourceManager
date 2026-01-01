@@ -1,25 +1,24 @@
 package life.wuxueyang
 
 import com.aliyuncs.ecs.model.v20140526.DescribeInstancesRequest
-// import com.aliyuncs.vpc.model.v20160428.DescribeEipAddressesRequest  // Commented out since VPC SDK is not included
 
-class AliyunOperations(private val aliyunService: AliyunService) {
+class AliyunOperations(private val cloudServiceManager: CloudServiceManager) {
     
     fun listInstances(): String {
-        // This would implement listing all instances
-        // For now, we'll just return a placeholder
-        return "List instances operation would go here"
+        // This would implement listing all instances using DescribeInstancesRequest
+        val request = DescribeInstancesRequest()
+        // Implementation would go here
+        return "List instances functionality would use DescribeInstancesRequest"
     }
     
     fun listEips(): String {
         // This would implement listing all EIPs
-        // For now, we'll just return a placeholder
-        return "List EIPs operation would go here"
+        // For now, we'll return a message that it's not implemented due to missing VPC SDK
+        return "List EIPs functionality not implemented - VPC SDK not included"
     }
     
     fun getFullInstanceInfo(instanceId: String): String {
         // This would implement getting full instance information
-        // For now, we'll just return a placeholder
-        return "Full instance info for $instanceId would go here"
+        return cloudServiceManager.getAliyunInstanceStatus(instanceId)
     }
 }

@@ -19,21 +19,37 @@ class MainActivity : AppCompatActivity() {
     private lateinit var eipAllocationIdEditText: TextInputEditText
     private lateinit var bandwidthEditText: TextInputEditText
     private lateinit var instanceIdForBindEditText: TextInputEditText
+    private lateinit var domainEditText: TextInputEditText  // For Tencent Cloud DNS
+    private lateinit var eipForDnsEditText: TextInputEditText  // For Tencent Cloud DNS
     private lateinit var resultTextView: TextView
     
     private lateinit var startInstanceButton: Button
     private lateinit var stopInstanceButton: Button
     private lateinit var refreshStatusButton: Button
+    private lateinit var listEcsInstancesButton: Button  // New button
+    private lateinit var listEipsButton: Button  // New button
     private lateinit var createEipButton: Button
     private lateinit var releaseEipButton: Button
     private lateinit var bindEipButton: Button
     private lateinit var unbindEipButton: Button
+    private lateinit var bindTencentDnsButton: Button  // New button for Tencent DNS
     
-    private val aliyunService = AliyunService()
+    private val cloudServiceManager = CloudServiceManager()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        // Load stored credentials if available
+        val secureStorage = SecureStorage(this)
+        val (alibabaAccessKeyId, alibabaAccessKeySecret) = secureStorage.getAlibabaCredentials()
+        
+        if (!alibabaAccessKeyId.isNullOrBlank() && !alibabaAccessKeySecret.isNullOrBlank()) {
+            accessKeyIdEditText = findViewById(R.id.accessKeyIdEditText)
+            accessKeySecretEditText = findViewById(R.id.accessKeySecretEditText)
+            accessKeyIdEditText.setText(alibabaAccessKeyId)
+            accessKeySecretEditText.setText(alibabaAccessKeySecret)
+        }
 
         initViews()
         setupClickListeners()
@@ -47,15 +63,20 @@ class MainActivity : AppCompatActivity() {
         eipAllocationIdEditText = findViewById(R.id.eipAllocationIdEditText)
         bandwidthEditText = findViewById(R.id.bandwidthEditText)
         instanceIdForBindEditText = findViewById(R.id.instanceIdForBindEditText)
+        domainEditText = findViewById(R.id.domainEditText)  // New field for domain
+        eipForDnsEditText = findViewById(R.id.eipForDnsEditText)  // New field for EIP for DNS
         resultTextView = findViewById(R.id.resultTextView)
 
         startInstanceButton = findViewById(R.id.startInstanceButton)
         stopInstanceButton = findViewById(R.id.stopInstanceButton)
         refreshStatusButton = findViewById(R.id.refreshStatusButton)
+        listEcsInstancesButton = findViewById(R.id.listEcsInstancesButton)  // New button
+        listEipsButton = findViewById(R.id.listEipsButton)  // New button
         createEipButton = findViewById(R.id.createEipButton)
         releaseEipButton = findViewById(R.id.releaseEipButton)
         bindEipButton = findViewById(R.id.bindEipButton)
         unbindEipButton = findViewById(R.id.unbindEipButton)
+        bindTencentDnsButton = findViewById(R.id.bindTencentDnsButton)  // New button for Tencent DNS
     }
 
     private fun setupClickListeners() {
@@ -66,7 +87,7 @@ class MainActivity : AppCompatActivity() {
                     Utils.showToast(this, "Please enter Instance ID")
                     return@performAction
                 }
-                val result = aliyunService.startInstance(instanceId)
+                val result = cloudServiceManager.startAliyunInstance(instanceId)
                 updateResult(ResultFormatter.formatSuccess(result))
             }
         }
@@ -78,7 +99,7 @@ class MainActivity : AppCompatActivity() {
                     Utils.showToast(this, "Please enter Instance ID")
                     return@performAction
                 }
-                val result = aliyunService.stopInstance(instanceId)
+                val result = cloudServiceManager.stopAliyunInstance(instanceId)
                 updateResult(ResultFormatter.formatSuccess(result))
             }
         }
@@ -90,7 +111,23 @@ class MainActivity : AppCompatActivity() {
                     Utils.showToast(this, "Please enter Instance ID")
                     return@performAction
                 }
-                val result = aliyunService.getInstanceStatus(instanceId)
+                val result = cloudServiceManager.getAliyunInstanceStatus(instanceId)
+                updateResult(ResultFormatter.formatInfo(result))
+            }
+        }
+
+        // New button for listing ECS instances
+        listEcsInstancesButton.setOnClickListener {
+            performAction {
+                val result = cloudServiceManager.listAliyunEcsInstances()
+                updateResult(ResultFormatter.formatInfo(result))
+            }
+        }
+
+        // New button for listing EIPs
+        listEipsButton.setOnClickListener {
+            performAction {
+                val result = cloudServiceManager.listAliyunEips()
                 updateResult(ResultFormatter.formatInfo(result))
             }
         }
@@ -99,7 +136,7 @@ class MainActivity : AppCompatActivity() {
             performAction {
                 val bandwidthText = bandwidthEditText.text.toString().trim()
                 val bandwidth = if (bandwidthText.isNotEmpty()) bandwidthText.toInt() else 5
-                val result = aliyunService.createEip(bandwidth)
+                val result = cloudServiceManager.createAliyunEip(bandwidth)
                 updateResult(ResultFormatter.formatSuccess(result))
             }
         }
@@ -111,7 +148,7 @@ class MainActivity : AppCompatActivity() {
                     Utils.showToast(this, "Please enter EIP Allocation ID")
                     return@performAction
                 }
-                val result = aliyunService.releaseEip(allocationId)
+                val result = cloudServiceManager.releaseAliyunEip(allocationId)
                 updateResult(ResultFormatter.formatSuccess(result))
             }
         }
@@ -131,7 +168,7 @@ class MainActivity : AppCompatActivity() {
                     return@performAction
                 }
                 
-                val result = aliyunService.bindEipToInstance(allocationId, instanceId)
+                val result = cloudServiceManager.bindAliyunEipToInstance(allocationId, instanceId)
                 updateResult(ResultFormatter.formatSuccess(result))
             }
         }
@@ -151,7 +188,28 @@ class MainActivity : AppCompatActivity() {
                     return@performAction
                 }
                 
-                val result = aliyunService.unbindEipFromInstance(allocationId, instanceId)
+                val result = cloudServiceManager.unbindAliyunEipFromInstance(allocationId, instanceId)
+                updateResult(ResultFormatter.formatSuccess(result))
+            }
+        }
+
+        // New button for binding EIP to Tencent DNS
+        bindTencentDnsButton.setOnClickListener {
+            performAction {
+                val domain = domainEditText.text.toString().trim()
+                val eip = eipForDnsEditText.text.toString().trim()
+                
+                if (domain.isEmpty()) {
+                    Utils.showToast(this, "Please enter domain name")
+                    return@performAction
+                }
+                
+                if (eip.isEmpty()) {
+                    Utils.showToast(this, "Please enter EIP to bind to DNS")
+                    return@performAction
+                }
+                
+                val result = cloudServiceManager.bindEipToTencentDns(domain, eip)
                 updateResult(ResultFormatter.formatSuccess(result))
             }
         }
@@ -178,7 +236,7 @@ class MainActivity : AppCompatActivity() {
 
             // Initialize the client
             try {
-                aliyunService.initClient(accessKeyId, accessKeySecret, regionId)
+                cloudServiceManager.initAliyunClient(accessKeyId, accessKeySecret, regionId)
             } catch (e: Exception) {
                 updateResult(ResultFormatter.formatError("Error initializing client: ${e.message}"))
                 return@launch

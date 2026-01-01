@@ -51,7 +51,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/region_id"
-            android:text="cn-hangzhou" />
+            android:text="cn-hongkong" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- ECS Management Section -->
@@ -98,12 +98,29 @@
 
     </LinearLayout>
 
-    <Button
-        android:id="@+id/refreshStatusButton"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:text="@string/refresh_status" />
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <Button
+            android:id="@+id/refreshStatusButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:text="@string/refresh_status" />
+
+        <Button
+            android:id="@+id/listEcsInstancesButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="4dp"
+            android:text="List ECS" />
+
+    </LinearLayout>
 
     <!-- EIP Management Section -->
     <TextView
@@ -141,7 +158,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp">
+        android:layout_marginBottom="8dp">
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/instanceIdForBindEditText"
             android:layout_width="match_parent"
@@ -196,6 +213,60 @@
             android:text="@string/unbind_eip" />
 
     </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <Button
+            android:id="@+id/listEipsButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:text="List EIPs" />
+
+    </LinearLayout>
+
+    <!-- Tencent Cloud DNS Section -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tencent Cloud DNS"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="12dp" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/domainEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Domain Name" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/eipForDnsEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="EIP for DNS Binding" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <Button
+        android:id="@+id/bindTencentDnsButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Bind EIP to Tencent DNS"
+        android:layout_marginBottom="16dp" />
 
     <!-- Result TextView -->
     <TextView
